@@ -118,6 +118,8 @@
       line-height:1.45;
       margin-top:8px;
       color:var(--text);
+      word-wrap:break-word;
+      white-space:normal;
     }
 
     footer.note{ margin-top:14px; font-size:13px; opacity:.8; color:rgba(74,42,58,0.8) }
@@ -146,7 +148,7 @@
     <p class="lead">Click me.</p>
 
     <!-- Edit this button text if you like -->
-    <button class="big-link" id="openBtn">Open your surprise 🎀</button>
+    <button type="button" class="big-link" id="openBtn">Open your surprise 🎀</button>
 
     <footer class="note">
      Thank you for the long lasting memories❤️.
@@ -204,7 +206,7 @@
       </p>
 
       <div style="margin-top:18px;">
-        <button class="big-link" id="againBtn">Celebrate again 🎊</button>
+        <button type="button" class="big-link" id="againBtn">Celebrate again 🎊</button>
       </div>
     </div>
   </div>
@@ -216,7 +218,7 @@
     // ---------- How to customize ----------
     // Change the name and message below:
     const FRIEND_NAME = "Jana"; // <-- put your friend's name here
-    const MESSAGE = "Hey " + Jana + " — wishing you a lovely birthday filled with laughter and cake and all your wishes. You mean a lot to me!!";
+    const MESSAGE = "Hey " + FRIEND_NAME + " — wishing you a lovely birthday filled with laughter and cake and all your wishes. You mean a lot to me!!";
     // Optional: set a music MP3 URL. Leave empty string to disable.
     const MUSIC_URL = ""; // e.g. "https://example.com/song.mp3"
 
