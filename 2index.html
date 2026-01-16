@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Surprise Birthday Link</title>
+  <style>
+    :root{
+      /* Soft pastel purple palette - matte-like */
+      --bg1: #f6f5ff;        /* very pale lavender */
+      --bg2: #efe7ff;        /* soft lavender */
+      --card-bg: #ffffff;    /* card background (soft white) */
+      --card-edge: rgba(180,160,220,0.55); /* subtle card edge */
+      --accent: #8b63ff;     /* button accent (muted purple) */
+      --accent-2: #b99bff;   /* lighter button */
+      --text: #3a2b44;       /* warm dark purple text */
+      --muted: rgba(58,43,68,0.6);
+    }
+
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    body{
+      background: linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:var(--text);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
+
+    .card{
+      width:100%;
+      max-width:820px;
+      background: linear-gradient(180deg, var(--card-bg), #fcfbff);
+      border-radius:18px;
+      padding:28px;
+      box-shadow: 0 8px 28px rgba(110,80,150,0.06);
+      position:relative;
+      overflow:hidden;
+      text-align:center;
+      border: 1px solid var(--card-edge);
+    }
+
+    h1{margin:0 0 8px;font-size:26px;letter-spacing:0.2px}
+    p.lead{margin:0 0 18px;opacity:0.95;color:var(--muted)}
+
+    .big-link{
+      display:inline-block;
+      padding:14px 26px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color:white;
+      font-weight:700;
+      border-radius:999px;
+      text-decoration:none;
+      box-shadow:0 6px 18px rgba(110,80,150,0.08);
+      cursor:pointer;
+      border: none;
+      transition: transform .12s ease, box-shadow .12s ease;
+      font-size:16px;
+    }
+    .big-link:active{ transform: translateY(2px) scale(.998); }
+
+    /* Modal */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(60,36,90,0.06); /* very soft overlay */
+      z-index:30;
+      padding:20px;
+      visibility:hidden;
+      opacity:0;
+      transition: opacity .22s ease, visibility .22s ease;
+    }
+    .modal.open{ visibility:visible; opacity:1; }
+    .modal-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(254,252,255,0.98));
+      border-radius:14px;
+      padding:22px;
+      max-width:680px;
+      width:100%;
+      text-align:center;
+      position:relative;
+      box-shadow: 0 18px 40px rgba(80,40,120,0.06);
+      transform: translateY(8px);
+      border: 1px solid rgba(200,180,220,0.6);
+    }
+    .close-btn{
+      position:absolute;
+      top:10px;
+      right:10px;
+      background:transparent;
+      border:1px solid rgba(58,43,68,0.08);
+      color:var(--text);
+      border-radius:8px;
+      padding:6px 10px;
+      cursor:pointer;
+    }
+
+    .illustration-wrap{
+      max-width:240px;
+      margin:6px auto 8px;
+      display:block;
+    }
+
+    .photo{
+      max-width:220px;
+      width:100%;
+      border-radius:12px;
+      margin:8px auto;
+      display:block;
+      border:4px solid rgba(245,240,255,0.6);
+      background:linear-gradient(180deg, #fcfbff, #f6f1ff);
+    }
+
+    .message{
+      font-size:17px;
+      line-height:1.45;
+      margin-top:8px;
+      color:var(--text);
+      word-wrap:break-word;
+      white-space:normal;
+      text-align:center;
+    }
+
+    footer.note{ 
+      margin-top:14px; 
+      font-size:13px; 
+      opacity:.95; 
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      flex-direction:column;
+    }
+
+    .sender {
+      font-size:13px;
+      color:var(--muted);
+    }
+    .sender a {
+      color:var(--accent-2);
+      text-decoration:none;
+      font-weight:600;
+    }
+    .sender a:hover { text-decoration:underline; }
+
+    /* Confetti canvas sits above everything inside card */
+    canvas.confetti {
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:20;
+    }
+
+    @media (max-width:520px){
+      h1{font-size:20px}
+      .big-link{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <canvas class="confetti" id="confetti"></canvas>
+
+    <h1>HAPPY BIRTHDAY!!!</h1>
+    <p class="lead">Click me.</p>
+
+    <!-- Edit this button text if you like -->
+    <button type="button" class="big-link" id="openBtn">Open your surprise 🎀</button>
+
+    <footer class="note">
+      <div>Thank you for the long lasting memories ❤️.</div>
+      <div class="sender" id="senderCredit"></div>
+    </footer>
+  </div>
+
+  <!-- Modal shows after clicking the link -->
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="close-btn" id="closeBtn">Close ✕</button>
+      <h2 id="modalTitle">Happy Birthday, Judy!</h2>
+
+      <!-- Inline cake illustration (shown by default if no photo provided) -->
+      <div class="illustration-wrap" id="cakeWrap" aria-hidden="true">
+        <!-- Simple friendly cake SVG adjusted to purple hues -->
+        <svg id="cakeSvg" viewBox="0 0 200 200" width="220" height="220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Birthday cake illustration">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#f6f5ff"/>
+              <stop offset="1" stop-color="#efe7ff"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#e6d5ff"/>
+              <stop offset="1" stop-color="#cbb3ff"/>
+            </linearGradient>
+          </defs>
+
+          <!-- plate -->
+          <ellipse cx="100" cy="170" rx="62" ry="12" fill="#f6f0ff" opacity="0.9"/>
+          <!-- bottom cake layer -->
+          <rect x="40" y="100" rx="10" ry="10" width="120" height="44" fill="url(#g2)"/>
+          <!-- icing -->
+          <path d="M40 100c6 10 18 12 30 12s24-4 36-4 24 4 30 4v-12c0-8-12-10-30-10s-24 4-36 4-30-6-60 6z" fill="url(#g1)"/>
+          <!-- top candle flames -->
+          <g transform="translate(100,72)">
+            <rect x="-6" y="-22" width="12" height="22" rx="3" fill="#fbf8ff"/>
+            <path d="M0 -24c6 6 6 10 0 18c-6-8-6-12 0-18z" fill="#ffd86b"/>
+          </g>
+
+          <!-- sprinkles -->
+          <g fill="#fff" opacity="0.9">
+            <rect x="58" y="116" width="6" height="2" transform="rotate(20 61 117)"/>
+            <rect x="120" y="122" width="6" height="2" transform="rotate(-32 123 123)"/>
+            <rect x="80" y="110" width="6" height="2" transform="rotate(12 83 111)"/>
+            <rect x="98" y="122" width="6" height="2" transform="rotate(-18 101 123)"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Replace the src below with a photo URL or remove the image element if not needed -->
+      <img id="photo" class="photo" src="" alt="Birthday photo" style="display:none;" />
+
+      <p class="message" id="messageText">
+        Judy — wishing you an amazing birthday filled with laughter, cake, and all your wishes. You mean a lot to me!
+      </p>
+
+      <div style="margin-top:18px;">
+        <button type="button" class="big-link" id="againBtn">Celebrate again 🎊</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional audio element. Put a link to a music file (mp3) or remove the element. -->
+  <audio id="song" preload="none"></audio>
+
+  <script>
+    // ---------- How to customize ----------
+    // Change the name and message below:
+    const FRIEND_NAME = "Judy";
+    const MESSAGE = "Hey " + FRIEND_NAME + " — wishing you a lovely birthday filled with laughter and cake and all your wishes. You mean a lot to me!!";
+
+    // Sender credit (shows "From Ghida Mero" in the footer)
+    const SENDER_NAME = "Ghida Mero";
+    // Optional: set a URL for the sender (profile/website). Leave empty to show plain text.
+    const SENDER_URL = ""; // e.g. "https://example.com/ghida"
+
+    // Optional: set a music MP3 URL. Leave empty string to disable.
+    const MUSIC_URL = ""; // e.g. "https://example.com/song.mp3"
+
+    // Optional: change image URL. If empty, the cake illustration will show instead.
+    const IMAGE_URL = ""; // e.g. "https://example.com/photo.jpg"
+
+    // ---------- Wiring UI ----------
+    const openBtn = document.getElementById('openBtn');
+    const modal = document.getElementById('modal');
+    const closeBtn = document.getElementById('closeBtn');
+    const againBtn = document.getElementById('againBtn');
+    const messageText = document.getElementById('messageText');
+    const modalTitle = document.getElementById('modalTitle');
+    const photo = document.getElementById('photo');
+    const song = document.getElementById('song');
+    const cakeWrap = document.getElementById('cakeWrap');
+    const cakeSvg = document.getElementById('cakeSvg');
+    const senderCredit = document.getElementById('senderCredit');
+
+    // Apply custom content
+    messageText.textContent = MESSAGE;
+    modalTitle.textContent = "Happy Birthday, " + FRIEND_NAME + "!";
+
+    // Render sender credit (link if SENDER_URL provided)
+    if (SENDER_URL && SENDER_URL.trim() !== "") {
+      senderCredit.innerHTML = 'From <a id="senderLink" href="' + SENDER_URL + '" target="_blank" rel="noopener noreferrer">' + SENDER_NAME + '</a>';
+    } else {
+      senderCredit.textContent = 'From ' + SENDER_NAME;
+    }
+
+    if (IMAGE_URL && IMAGE_URL.trim() !== "") {
+      // show photo, hide illustration
+      photo.src = IMAGE_URL;
+      photo.alt = FRIEND_NAME + " photo";
+      photo.style.display = "block";
+      cakeWrap.style.display = "none";
+    } else {
+      // no photo -> show cake illustration
+      photo.style.display = "none";
+      cakeWrap.style.display = "block";
+    }
+
+    if (MUSIC_URL) {
+      song.src = MUSIC_URL;
+      song.volume = 0.6;
+    }
+
+    function openModal() {
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      runConfettiOnce();
+      if (MUSIC_URL) {
+        song.currentTime = 0;
+        song.play().catch(e => {/* autoplay might be blocked; user can press play */});
+      }
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden','true');
+      // stop music if playing
+      if (!song.paused) song.pause();
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    againBtn.addEventListener('click', runConfettiOnce);
+
+    // close modal when clicking outside the card
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // ---------- Simple confetti ----------
+    // Pastel confetti colors to match the purple palette
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    let W = 0, H = 0, confettiPieces = [];
+    function resize() {
+      W = canvas.width = canvas.clientWidth;
+      H = canvas.height = canvas.clientHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    function createConfetti(count=90) {
+      confettiPieces = [];
+      const colors = ["#e7dbff","#ded3ff","#f0eaff","#e9dbff","#f6f2ff","#f9f6ff"];
+      for (let i=0;i<count;i++){
+        confettiPieces.push({
+          x: Math.random()*W,
+          y: Math.random()*H - H*0.5,
+          w: 6 + Math.random()*6,
+          h: 8 + Math.random()*8,
+          r: Math.random()*360,
+          vr: (Math.random()-0.5)*6,
+          vx: (Math.random()-0.5)*4,
+          vy: 1 + Math.random()*4,
+          color: colors[Math.floor(Math.random()*colors.length)],
+          ttl: 140 + Math.floor(Math.random()*60),
+          age: 0,
+        });
+      }
+    }
+
+    let confettiRunning = false;
+    function runConfettiOnce() {
+      if (confettiRunning) return;
+      confettiRunning = true;
+      createConfetti(90);
+      function animate() {
+        ctx.clearRect(0,0,W,H);
+        for (let p of confettiPieces){
+          p.x += p.vx;
+          p.y += p.vy;
+          p.r += p.vr;
+          p.age++;
+          ctx.save();
+          ctx.translate(p.x,p.y);
+          ctx.rotate(p.r * Math.PI/180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+          ctx.restore();
+        }
+        confettiPieces = confettiPieces.filter(p => p.age < p.ttl && p.y < H + 40);
+        if (confettiPieces.length) {
+          requestAnimationFrame(animate);
+        } else {
+          confettiRunning = false;
+          ctx.clearRect(0,0,W,H);
+        }
+      }
+      animate();
+    }
+
+    // Optional: Press Enter/Space on open button to open for accessibility
+    openBtn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
+        e.preventDefault();
+        openModal();
+      }
+    });
+  </script>
+</body>
+</html>
