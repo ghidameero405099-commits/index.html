@@ -216,7 +216,7 @@
     // ---------- How to customize ----------
     // Change the name and message below:
     const FRIEND_NAME = "Jana"; // <-- put your friend's name here
-    const MESSAGE = "Hey " + Jana + " — wishing you a lovely birthday filled with laughter and cake!";
+    const MESSAGE = "Hey " + FRIEND_NAME + " — wishing you a lovely birthday filled with laughter and cake!";
     // Optional: set a music MP3 URL. Leave empty string to disable.
     const MUSIC_URL = ""; // e.g. "https://example.com/song.mp3"
 
@@ -237,12 +237,12 @@
 
     // Apply custom content
     messageText.textContent = MESSAGE;
-    modalTitle.textContent = "Happy Birthday, " + Jana + "!";
+    modalTitle.textContent = "Happy Birthday, " + FRIEND_NAME + "!";
 
     if (IMAGE_URL && IMAGE_URL.trim() !== "") {
       // show photo, hide illustration
       photo.src = IMAGE_URL;
-      photo.alt = Jana + " photo";
+      photo.alt = FRIEND_NAME + " photo";
       photo.style.display = "block";
       cakeWrap.style.display = "none";
     } else {
@@ -345,7 +345,10 @@
 
     // Optional: Press Enter/Space on open button to open for accessibility
     openBtn.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') openModal();
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar' || e.code === 'Space') {
+        e.preventDefault();
+        openModal();
+      }
     });
   </script>
 </body>
